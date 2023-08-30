@@ -1,16 +1,16 @@
-import type { Pokemon } from '@/pokemons';
+import type { Pokemon, PokemonsResponse } from '@/pokemons';
 import { Metadata } from 'next';
 import Image from 'next/image';
 import { notFound } from 'next/navigation';
 
 interface Props {
-  params: { id: string }
+  params: { name: string }
 }
 
 // eslint-disable-next-line consistent-return
-const getPokemon = async (id: string): Promise<Pokemon> => {
+const getPokemon = async (name: string): Promise<Pokemon> => {
   try {
-    const pokemon = await fetch(`https://pokeapi.co/api/v2/pokemon/${id}`, {
+    const pokemon = await fetch(`https://pokeapi.co/api/v2/pokemon/${name}`, {
       cache: 'force-cache',
       next: {
         revalidate: 60 * 60 * 30 * 6,
@@ -26,18 +26,23 @@ const getPokemon = async (id: string): Promise<Pokemon> => {
 
 // Static Site Generating - Build time
 export async function generateStaticParams() {
-  // Generate 151 static pages
-  const static151Pokemons = Array.from({ length: 151 }, (_, i) => `${i + 1}`);
+  // Grab 151 pokemons and create 151 static pages
+  const data: PokemonsResponse = await fetch('https://pokeapi.co/api/v2/pokemon?limit=151')
+    .then((res) => res.json());
+
+  const static151Pokemons = data.results.map((pokemon) => ({
+    name: pokemon.name,
+  }));
 
   // Has to return the id as it is what is defined in the Props
-  return static151Pokemons.map((id) => ({
-    id,
+  return static151Pokemons.map((name) => ({
+    name,
   }));
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   try {
-    const { id, name } = await getPokemon(params.id); // duplicated http request
+    const { id, name } = await getPokemon(params.name); // duplicated http request
 
     return {
       title: `#${id} - ${name}`,
@@ -52,7 +57,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 }
 
 export default async function PokemonPage({ params }: Props) {
-  const pokemon = await getPokemon(params.id);
+  const pokemon = await getPokemon(params.name);
 
   return (
     <div className="flex mt-5 flex-col items-center text-slate-800">
