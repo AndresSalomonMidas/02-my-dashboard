@@ -17,5 +17,13 @@ module.exports = {
         tsx: 'never',
       },
     ],
+    // For Redux slices
+    'no-param-reassign': ['error', {
+      props: true,
+      ignorePropertyModificationsFor: [
+        'state',
+        'action',
+      ],
+    }],
   },
 };
