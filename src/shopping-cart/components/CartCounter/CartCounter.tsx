@@ -19,6 +19,7 @@ const getApiCounter = async (): Promise<CounterResponse> => {
   return data;
 };
 
+// eslint-disable-next-line no-unused-vars
 export const CartCounter = ({ value = 0 }: Props) => {
   const counter = useAppSelector((state) => state.counter.count);
   const dispatch = useAppDispatch();
